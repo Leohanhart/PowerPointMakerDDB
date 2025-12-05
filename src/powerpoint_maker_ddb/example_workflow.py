@@ -10,7 +10,7 @@ This script shows how to:
 """
 import os
 from dotenv import load_dotenv
-from service.workflow_service import WorkflowService
+from powerpoint_maker_ddb.service.workflow_service import WorkflowService
 
 # Load environment variables
 load_dotenv()

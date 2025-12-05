@@ -22,14 +22,14 @@ dev = [
 ]
 
 [project.scripts]
-powerpoint-maker = "src.main:main"
+powerpoint-maker = "powerpoint_maker_ddb.main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src*"]
+where = ["src"]
+include = ["powerpoint_maker_ddb*"]
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]

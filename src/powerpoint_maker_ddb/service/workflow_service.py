@@ -8,7 +8,7 @@ from datetime import datetime
 from openai import OpenAI
 from dotenv import load_dotenv
 
-from service.pdf_service import PDFService
+from powerpoint_maker_ddb.service.pdf_service import PDFService
 
 # Load environment variables
 load_dotenv()
@@ -17,7 +17,7 @@ load_dotenv()
 class WorkflowService:
     """Service to orchestrate embedding search and PDF generation workflow."""
     
-    def __init__(self, vector_file: str = "src/service/vectors.pkl", output_folder: str = "src/pdf"):
+    def __init__(self, vector_file: str = "src/powerpoint_maker_ddb/service/vectors.pkl", output_folder: str = "src/pdf"):
         """
         Initialize the workflow service.
         
