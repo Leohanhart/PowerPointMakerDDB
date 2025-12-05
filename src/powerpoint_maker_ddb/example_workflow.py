@@ -6,7 +6,7 @@ This script shows how to:
 2. Automatically discover topics from PDF content
 3. Search topics from vectors
 4. Get and summarize information per topic
-5. Generate a PDF with summaries
+5. Generate a PowerPoint presentation with summaries
 """
 import os
 from dotenv import load_dotenv
@@ -35,7 +35,7 @@ def main():
     # 2. Automatically discover topics from the PDF content
     # 3. Search for each discovered topic in the vector database
     # 4. Summarize information for each topic
-    # 5. Generate a PDF with all summaries
+    # 5. Generate a PowerPoint presentation with all summaries
     result = workflow.run_workflow(
         topics=None,  # None = auto-discover topics from PDF content
         top_k=5,  # Number of top results to retrieve per topic
@@ -44,7 +44,7 @@ def main():
     )
     
     print(f"\n✓ Workflow completed!")
-    print(f"  PDF saved to: {result['pdf_path']}")
+    print(f"  PowerPoint saved to: {result['pptx_path']}")
     print(f"  Topics discovered: {result['topics']}")
     print(f"  Topics processed: {result['topics_processed']}")
     

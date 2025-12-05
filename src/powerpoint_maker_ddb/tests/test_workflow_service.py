@@ -36,8 +36,8 @@ class TestWorkflowService:
         summary = workflow_service.summarize_information("test topic", [])
         assert "No relevant information" in summary
     
-    def test_generate_pdf(self, workflow_service, tmp_path):
-        """Test PDF generation."""
+    def test_generate_powerpoint(self, workflow_service, tmp_path):
+        """Test PowerPoint generation."""
         # Set output folder to temporary directory
         workflow_service.output_folder = tmp_path
         
@@ -46,22 +46,22 @@ class TestWorkflowService:
             "Topic 2": "This is a test summary for topic 2."
         }
         
-        pdf_path = workflow_service.generate_pdf(test_summaries, output_filename="test.pdf")
+        pptx_path = workflow_service.generate_powerpoint(test_summaries, output_filename="test.pptx")
         
-        assert pdf_path.exists()
-        assert pdf_path.suffix == ".pdf"
-        assert pdf_path.stat().st_size > 0
+        assert pptx_path.exists()
+        assert pptx_path.suffix == ".pptx"
+        assert pptx_path.stat().st_size > 0
     
-    def test_generate_pdf_auto_filename(self, workflow_service, tmp_path):
-        """Test PDF generation with auto-generated filename."""
+    def test_generate_powerpoint_auto_filename(self, workflow_service, tmp_path):
+        """Test PowerPoint generation with auto-generated filename."""
         workflow_service.output_folder = tmp_path
         
         test_summaries = {
             "Topic 1": "Test summary"
         }
         
-        pdf_path = workflow_service.generate_pdf(test_summaries)
+        pptx_path = workflow_service.generate_powerpoint(test_summaries)
         
-        assert pdf_path.exists()
-        assert pdf_path.name.startswith("topic_summaries_")
-        assert pdf_path.suffix == ".pdf"
+        assert pptx_path.exists()
+        assert pptx_path.name.startswith("topic_summaries_")
+        assert pptx_path.suffix == ".pptx"

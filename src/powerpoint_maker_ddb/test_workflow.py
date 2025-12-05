@@ -3,7 +3,7 @@ Test script to test all functions and workflows.
 
 This script tests:
 1. PDFService - PDF processing and embedding creation
-2. WorkflowService - Topic discovery, search, summarization, and PDF generation
+2. WorkflowService - Topic discovery, search, summarization, and PowerPoint generation
 3. All workflow steps individually
 """
 import os
@@ -217,10 +217,10 @@ def test_summarization():
         return False
 
 
-def test_pdf_generation():
-    """Test PDF generation."""
+def test_powerpoint_generation():
+    """Test PowerPoint generation."""
     print("\n" + "=" * 60)
-    print("TEST 7: PDF Generation")
+    print("TEST 7: PowerPoint Generation")
     print("=" * 60)
     
     try:
@@ -228,24 +228,24 @@ def test_pdf_generation():
         
         # Create test summaries
         test_summaries = {
-            "Test Topic 1": "This is a test summary for topic 1. It contains some sample information to demonstrate the PDF generation functionality.",
-            "Test Topic 2": "This is a test summary for topic 2. It shows how multiple topics can be included in a single PDF document.",
-            "Test Topic 3": "This is a test summary for topic 3. The PDF generator formats each topic with proper headings and spacing."
+            "Test Topic 1": "This is a test summary for topic 1. It contains some sample information to demonstrate the PowerPoint generation functionality.",
+            "Test Topic 2": "This is a test summary for topic 2. It shows how multiple topics can be included in a single PowerPoint presentation.",
+            "Test Topic 3": "This is a test summary for topic 3. The PowerPoint generator formats each topic with proper headings and spacing."
         }
         
-        print("Generating test PDF...")
-        pdf_path = workflow.generate_pdf(test_summaries, output_filename="test_output.pdf")
+        print("Generating test PowerPoint...")
+        pptx_path = workflow.generate_powerpoint(test_summaries, output_filename="test_output.pptx")
         
-        if pdf_path.exists():
-            print(f"✓ PDF generated successfully: {pdf_path}")
-            print(f"✓ File size: {pdf_path.stat().st_size} bytes")
+        if pptx_path.exists():
+            print(f"✓ PowerPoint generated successfully: {pptx_path}")
+            print(f"✓ File size: {pptx_path.stat().st_size} bytes")
             return True
         else:
-            print("✗ PDF file was not created.")
+            print("✗ PowerPoint file was not created.")
             return False
             
     except Exception as e:
-        print(f"✗ Error in PDF generation: {str(e)}")
+        print(f"✗ Error in PowerPoint generation: {str(e)}")
         return False
 
 
@@ -262,14 +262,14 @@ def test_full_workflow():
         result = workflow.run_workflow(
             topics=None,  # Auto-discover
             top_k=5,
-            output_filename="full_workflow_test.pdf",
+            output_filename="full_workflow_test.pptx",
             num_topics=5
         )
         
         if result["status"] == "success":
             print(f"\n✓ Workflow completed successfully!")
             print(f"  Topics discovered: {result['topics']}")
-            print(f"  PDF saved to: {result['pdf_path']}")
+            print(f"  PowerPoint saved to: {result['pptx_path']}")
             return True
         else:
             print(f"✗ Workflow failed with status: {result.get('status', 'unknown')}")
@@ -297,13 +297,13 @@ def test_custom_topics_workflow():
         result = workflow.run_workflow(
             topics=custom_topics,
             top_k=5,
-            output_filename="custom_topics_test.pdf"
+            output_filename="custom_topics_test.pptx"
         )
         
         if result["status"] == "success":
             print(f"\n✓ Workflow completed successfully!")
             print(f"  Topics processed: {result['topics']}")
-            print(f"  PDF saved to: {result['pdf_path']}")
+            print(f"  PowerPoint saved to: {result['pptx_path']}")
             return True
         else:
             print(f"✗ Workflow failed with status: {result.get('status', 'unknown')}")
@@ -350,8 +350,8 @@ def run_all_tests():
     # Test 6: Summarization
     results["Summarization"] = test_summarization()
     
-    # Test 7: PDF Generation
-    results["PDF Generation"] = test_pdf_generation()
+    # Test 7: PowerPoint Generation
+    results["PowerPoint Generation"] = test_powerpoint_generation()
     
     # Test 8: Full Workflow (Auto)
     results["Full Workflow (Auto)"] = test_full_workflow()
@@ -384,7 +384,7 @@ def run_specific_test(test_number: int):
         4: ("Topic Discovery", test_topic_discovery),
         5: ("Topic Search", test_topic_search),
         6: ("Summarization", test_summarization),
-        7: ("PDF Generation", test_pdf_generation),
+        7: ("PowerPoint Generation", test_powerpoint_generation),
         8: ("Full Workflow (Auto)", test_full_workflow),
         9: ("Full Workflow (Custom)", test_custom_topics_workflow),
     }

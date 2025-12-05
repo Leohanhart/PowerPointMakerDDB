@@ -15,15 +15,15 @@ load_dotenv()
 
 
 class WorkflowService:
-    """Service to orchestrate embedding search and PDF generation workflow."""
+    """Service to orchestrate embedding search and PowerPoint generation workflow."""
     
-    def __init__(self, vector_file: str = "src/powerpoint_maker_ddb/service/vectors.pkl", output_folder: str = "src/pdf"):
+    def __init__(self, vector_file: str = "src/powerpoint_maker_ddb/service/vectors.pkl", output_folder: str = "src/powerpoint"):
         """
         Initialize the workflow service.
         
         Args:
             vector_file: Path to vector storage file
-            output_folder: Folder to save output PDFs
+            output_folder: Folder to save output PowerPoint files
         """
         self.pdf_service = PDFService(vector_file=vector_file)
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -206,97 +206,96 @@ Please summarize the key points about "{topic}" in a clear and structured way. K
         except Exception as e:
             raise Exception(f"Error summarizing information: {str(e)}")
     
-    def generate_pdf(self, topic_summaries: Dict[str, str], output_filename: Optional[str] = None) -> Path:
+    def generate_powerpoint(self, topic_summaries: Dict[str, str], output_filename: Optional[str] = None) -> Path:
         """
-        Generate a PDF with summarized information for each topic.
+        Generate a PowerPoint presentation with summarized information for each topic.
         
         Args:
             topic_summaries: Dictionary mapping topics to their summaries
             output_filename: Optional custom output filename
             
         Returns:
-            Path to the generated PDF file
+            Path to the generated PowerPoint file
         """
         try:
-            from reportlab.lib.pagesizes import A4
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import inch
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-            from reportlab.lib.enums import TA_LEFT, TA_CENTER
+            from pptx import Presentation
+            from pptx.util import Inches, Pt
+            from pptx.enum.text import PP_ALIGN
         except ImportError:
-            raise ImportError("reportlab is required. Install it with: pip install reportlab")
+            raise ImportError("python-pptx is required. Install it with: pip install python-pptx")
         
-        # Generate output filename
+        # Generate output filename with timestamp
         if output_filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_filename = f"topic_summaries_{timestamp}.pdf"
+            output_filename = f"topic_summaries_{timestamp}.pptx"
         
-        if not output_filename.endswith('.pdf'):
-            output_filename += '.pdf'
+        if not output_filename.endswith('.pptx'):
+            output_filename += '.pptx'
         
         output_path = self.output_folder / output_filename
         
-        # Create PDF document
-        doc = SimpleDocTemplate(str(output_path), pagesize=A4)
-        story = []
+        # Create PowerPoint presentation
+        prs = Presentation()
+        prs.slide_width = Inches(10)
+        prs.slide_height = Inches(7.5)
         
-        # Define styles
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
-            parent=styles['Heading1'],
-            fontSize=24,
-            textColor='#1a1a1a',
-            spaceAfter=30,
-            alignment=TA_CENTER
-        )
-        topic_style = ParagraphStyle(
-            'CustomTopic',
-            parent=styles['Heading2'],
-            fontSize=18,
-            textColor='#2c3e50',
-            spaceAfter=12,
-            spaceBefore=20
-        )
-        summary_style = ParagraphStyle(
-            'CustomSummary',
-            parent=styles['Normal'],
-            fontSize=11,
-            textColor='#34495e',
-            spaceAfter=12,
-            leading=16,
-            alignment=TA_LEFT
-        )
+        # Title slide
+        title_slide_layout = prs.slide_layouts[0]
+        slide = prs.slides.add_slide(title_slide_layout)
+        title = slide.shapes.title
+        subtitle = slide.placeholders[1]
         
-        # Add title
-        story.append(Paragraph("Topic Summaries Report", title_style))
-        story.append(Spacer(1, 0.3*inch))
-        story.append(Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal']))
-        story.append(Spacer(1, 0.5*inch))
+        title.text = "Topic Summaries Report"
+        subtitle.text = f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         
-        # Add summaries for each topic
+        # Add a slide for each topic
         for i, (topic, summary) in enumerate(topic_summaries.items(), 1):
-            # Add topic heading
-            story.append(Paragraph(f"{i}. {topic}", topic_style))
-            story.append(Spacer(1, 0.1*inch))
+            # Use blank layout for more control
+            blank_slide_layout = prs.slide_layouts[6]
+            slide = prs.slides.add_slide(blank_slide_layout)
             
-            # Add summary (escape HTML special characters)
-            summary_escaped = summary.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            story.append(Paragraph(summary_escaped, summary_style))
+            # Add topic title
+            left = Inches(0.5)
+            top = Inches(0.5)
+            width = Inches(9)
+            height = Inches(1)
             
-            # Add spacing between topics (except for last one)
-            if i < len(topic_summaries):
-                story.append(Spacer(1, 0.3*inch))
+            title_box = slide.shapes.add_textbox(left, top, width, height)
+            title_frame = title_box.text_frame
+            title_frame.text = f"{i}. {topic}"
+            title_paragraph = title_frame.paragraphs[0]
+            title_paragraph.font.size = Pt(32)
+            title_paragraph.font.bold = True
+            title_paragraph.alignment = PP_ALIGN.LEFT
+            
+            # Add summary content
+            content_top = Inches(1.8)
+            content_height = Inches(5)
+            content_box = slide.shapes.add_textbox(left, content_top, width, content_height)
+            content_frame = content_box.text_frame
+            content_frame.word_wrap = True
+            
+            # Split summary into paragraphs if it's long
+            summary_lines = summary.split('\n')
+            for j, line in enumerate(summary_lines):
+                if j == 0:
+                    p = content_frame.paragraphs[0]
+                else:
+                    p = content_frame.add_paragraph()
+                p.text = line.strip()
+                p.font.size = Pt(14)
+                p.alignment = PP_ALIGN.LEFT
+                p.space_after = Pt(6)
         
-        # Build PDF
-        doc.build(story)
+        # Save presentation
+        prs.save(str(output_path))
         
-        print(f"\n✓ PDF generated: {output_path}")
+        print(f"\n✓ PowerPoint generated: {output_path}")
         return output_path
     
     def run_workflow(self, topics: Optional[List[str]] = None, top_k: int = 5, output_filename: Optional[str] = None, num_topics: int = 5) -> Dict[str, Any]:
         """
-        Run the complete workflow: load embeddings, discover/search topics, summarize, and generate PDF.
+        Run the complete workflow: load embeddings, discover/search topics, summarize, and generate PowerPoint.
         
         Args:
             topics: Optional list of topics to search and summarize. If None, topics will be auto-discovered.
@@ -337,9 +336,9 @@ Please summarize the key points about "{topic}" in a clear and structured way. K
             topic_summaries[topic] = summary
             print(f"    ✓ Summary created ({len(summary)} characters)")
         
-        # Step 5: Generate PDF
-        print(f"\nGenerating PDF with summaries...")
-        pdf_path = self.generate_pdf(topic_summaries, output_filename)
+        # Step 5: Generate PowerPoint
+        print(f"\nGenerating PowerPoint with summaries...")
+        pptx_path = self.generate_powerpoint(topic_summaries, output_filename)
         
         print("\n" + "=" * 60)
         print("Workflow completed successfully!")
@@ -349,7 +348,7 @@ Please summarize the key points about "{topic}" in a clear and structured way. K
             "status": "success",
             "topics_processed": len(topics),
             "topics": topics,
-            "pdf_path": str(pdf_path),
+            "pptx_path": str(pptx_path),
             "summaries": topic_summaries
         }
 
