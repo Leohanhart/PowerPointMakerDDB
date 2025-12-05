@@ -203,4 +203,50 @@ class PDFService:
         
         with open(self.vector_file, 'rb') as f:
             return pickle.load(f)
+    
+    def search_vectors(self, query: str, top_k: int = 5, vector_data: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """
+        Search for similar chunks using vector similarity.
+        
+        Args:
+            query: Search query string
+            top_k: Number of top results to return
+            vector_data: Optional pre-loaded vector data (if None, will load from file)
+            
+        Returns:
+            List of dictionaries with chunk text, similarity score, and metadata
+        """
+        # Load vectors if not provided
+        if vector_data is None:
+            vector_data = self.load_vectors()
+        
+        if len(vector_data["chunks"]) == 0:
+            return []
+        
+        # Create embedding for the query
+        query_embedding = self.create_embeddings([query])[0]
+        query_vector = np.array(query_embedding)
+        
+        # Calculate cosine similarity
+        embeddings = vector_data["embeddings"]
+        # Normalize vectors for cosine similarity
+        query_norm = query_vector / (np.linalg.norm(query_vector) + 1e-10)
+        embeddings_norm = embeddings / (np.linalg.norm(embeddings, axis=1, keepdims=True) + 1e-10)
+        
+        # Calculate similarities
+        similarities = np.dot(embeddings_norm, query_norm)
+        
+        # Get top_k indices
+        top_indices = np.argsort(similarities)[::-1][:top_k]
+        
+        # Build results
+        results = []
+        for idx in top_indices:
+            results.append({
+                "chunk": vector_data["chunks"][idx],
+                "similarity": float(similarities[idx]),
+                "metadata": vector_data["metadata"][idx]
+            })
+        
+        return results
 
