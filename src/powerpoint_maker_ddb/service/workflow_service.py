@@ -68,8 +68,7 @@ class WorkflowService:
         
         print(f"\nDiscovering topics from PDF content...")
         
-        # Sample chunks for analysis (take a representative sample)
-        # Take chunks from beginning, middle, and end for better coverage
+        # Sample chunks for analysis
         if len(chunks) <= sample_size:
             sample_chunks = chunks
         else:
@@ -80,7 +79,7 @@ class WorkflowService:
         sample_text = "\n\n---\n\n".join([f"[Section {i+1}]\n{chunk}" for i, chunk in enumerate(sample_chunks)])
         
         # Limit the text length to avoid token limits
-        max_text_length = 8000  # Leave room for prompt
+        max_text_length = 8000
         if len(sample_text) > max_text_length:
             sample_text = sample_text[:max_text_length] + "..."
         
@@ -118,11 +117,10 @@ Do not include numbers, bullets, or any other formatting - just the topic names,
             topics = []
             for line in response_text.split('\n'):
                 line = line.strip()
-                # Remove numbering if present (e.g., "1. Topic" or "Topic 1:")
                 if line:
                     # Remove leading numbers, dots, dashes, etc.
                     cleaned = line.lstrip('0123456789.-) ').strip()
-                    if cleaned and len(cleaned) > 2:  # Filter out very short lines
+                    if cleaned and len(cleaned) > 2:
                         topics.append(cleaned)
             
             # Limit to requested number of topics
@@ -220,10 +218,10 @@ Please summarize the key points about "{topic}" in a clear and structured way. K
             Path to the generated PDF file
         """
         try:
-            from reportlab.lib.pagesizes import letter, A4
+            from reportlab.lib.pagesizes import A4
             from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
             from reportlab.lib.units import inch
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
             from reportlab.lib.enums import TA_LEFT, TA_CENTER
         except ImportError:
             raise ImportError("reportlab is required. Install it with: pip install reportlab")

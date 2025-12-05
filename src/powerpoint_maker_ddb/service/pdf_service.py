@@ -109,7 +109,7 @@ class PDFService:
         
         try:
             response = self.client.embeddings.create(
-                model="text-embedding-3-small",  # or "text-embedding-ada-002"
+                model="text-embedding-3-small",
                 input=chunks
             )
             

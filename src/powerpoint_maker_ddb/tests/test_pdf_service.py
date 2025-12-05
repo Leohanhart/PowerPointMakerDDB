@@ -57,4 +57,3 @@ class TestPDFService:
         }
         results = pdf_service.search_vectors("test query", vector_data=empty_vector_data)
         assert results == []
-

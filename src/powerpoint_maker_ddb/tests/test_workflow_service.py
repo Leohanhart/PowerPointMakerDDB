@@ -65,4 +65,3 @@ class TestWorkflowService:
         assert pdf_path.exists()
         assert pdf_path.name.startswith("topic_summaries_")
         assert pdf_path.suffix == ".pdf"
-

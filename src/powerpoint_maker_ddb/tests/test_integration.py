@@ -85,4 +85,3 @@ class TestIntegration:
         assert summary is not None
         assert len(summary) > 0
         assert isinstance(summary, str)
-
